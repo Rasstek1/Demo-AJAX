@@ -1,27 +1,36 @@
+let usersData; // Variable globale pour stocker les données des utilisateurs
+
 function afficher() {
-    // GET JSON : Obtenir les données du serveur JSON
-    $.getJSON('https://641b4a3b1f5d999a446043ab.mockapi.io/JasonD')
-        .done(function (users) {
-            var page2 = window.open("page2/page2.html"); // open the second page
-            page2.onload = function() { // wait for the second page to finish loading
-                for (user of users) {
-                    page2.document.body.insertAdjacentHTML('beforeend', `
-                        <p id='user${user.id}'>${user.id}, ${user.username}, ${user.email}</p>
-                    `);
-                }
-            };
-        });
+  // Obtenir les données JSON du serveur
+  $.getJSON('https://641b4a3b1f5d999a446043ab.mockapi.io/JasonD')
+    .done(function (users) {
+      // Stocker les données dans la variable globale
+      usersData = users;
+    });
 }
 
+// Ajouter un gestionnaire d'événements pour le bouton "Aller à 2"
+document.querySelector('#boutonAller2').addEventListener('click', function() {
+  // Insérer les données des utilisateurs dans le DOM
+  if (usersData) {
+    document.body.innerHTML = ''; // Effacer le contenu de la page
+    for (user of usersData) {
+      document.body.insertAdjacentHTML('beforeend', `
+        <p id='user${user.id}'>${user.id}, ${user.username}, ${user.email}</p>
+      `);
+    }
+  }
+});
+
 $("form").submit(function (event){
-    event.preventDefault(); // Prevent the form from submitting
+    event.preventDefault(); // Empêcher le formulaire de soumettre les données
     //POST : Envoyer des données au serveur JSON
     $.ajax('https://641b4a3b1f5d999a446043ab.mockapi.io/JasonD', {
         data : JSON.stringify({ "username": $("#username").val(), "email" : $("#email").val() }),
         contentType : 'application/json',
         type : 'POST'
     }).done(function () {
-        afficher(); // Update the displayed data after adding a new user
+        afficher(); // Mettre à jour l'affichage après l'ajout d'un nouvel utilisateur
     });
 });
 
@@ -29,7 +38,7 @@ function modifier(){
     //Modifier l'utilisateur avec le id choisi.
     //Référence : https://github.com/mockapi-io/docs/wiki/Code-examples
     fetch(`https://641b4a3b1f5d999a446043ab.mockapi.io/JasonD/${$("#id").val()}`, {
-        method: 'PUT', // or PATCH
+        method: 'PUT', // ou PATCH
         headers: {'content-type':'application/json'},
         body: JSON.stringify({ "username": $("#username").val(), "email" : $("#email").val() })
     }).then(function (){
